@@ -13,17 +13,20 @@ export const BASE_ANIMATION_SPEED_MS = 120;
 export function useFrameAnimation(
   action: keyof typeof actions,
   isAnimating: boolean,
-  isLoading: boolean,
+  isLoading: boolean
 ) {
-  const animationFrameRef = useRef(0); // Internal logic for current frame index
-  const [currentFrame, setCurrentFrame] = useState(0); // Stateful frame for rendering
+  const animationFrameRef = useRef(0);
+  const [currentFrame, setCurrentFrame] = useState(0);
+
+  // Reset animation frame when action changes or animation stops
+  useEffect(() => {
+    animationFrameRef.current = 0;
+    setCurrentFrame(0);
+  }, [action, isAnimating]);
 
   // Animation loop effect
   useEffect(() => {
     if (isLoading || !isAnimating) {
-      // Ensure frame resets for rendering when animation stops or is loading
-      if (animationFrameRef.current !== 0) animationFrameRef.current = 0;
-      if (currentFrame !== 0) setCurrentFrame(0);
       return;
     }
 
@@ -33,17 +36,11 @@ export function useFrameAnimation(
           ? 0
           : animationFrameRef.current + 1;
       animationFrameRef.current = nextFrame;
-      setCurrentFrame(nextFrame); // Update stateful frame to trigger re-render
+      setCurrentFrame(nextFrame);
     }, BASE_ANIMATION_SPEED_MS);
 
     return () => clearInterval(interval);
-  }, [action, isLoading, isAnimating, currentFrame]); // Added currentFrame to ensure reset logic is covered if it was changed externally somehow, though primarily driven by internal state
+  }, [action, isLoading, isAnimating]);
 
-  // Reset animation frame state when not animating or when action changes
-  useEffect(() => {
-    animationFrameRef.current = 0;
-    setCurrentFrame(0);
-  }, [isAnimating, action]); // Reset on action change too
-
-  return { currentFrame }; // Return stateful frame
+  return { currentFrame };
 }

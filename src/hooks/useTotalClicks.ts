@@ -2,12 +2,12 @@ import { useReadContract } from "wagmi";
 import {
   COOKIE_CLICKER_CONTRACT_ADDRESS,
   COOKIE_CLICKER_CONTRACT_ABI,
-} from "@/const/contracts";
+} from "@/config/contracts/contracts";
 
 /**
  * Hook to read the total number of clicks from the contract from all players
  */
-export default function useTotalClicks() {
+export function useTotalClicks() {
   const { data: totalClicks, isLoading } = useReadContract({
     address: COOKIE_CLICKER_CONTRACT_ADDRESS,
     abi: COOKIE_CLICKER_CONTRACT_ABI,

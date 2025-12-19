@@ -3,10 +3,10 @@
 import Image from "next/image";
 import LoginFlow from "@/components/LoginFlow";
 import { DotPattern } from "@/components/DotPattern";
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { useAbstractSession } from "@/hooks/useAbstractSession";
 import { NumberTicker } from "@/components/magicui/number-ticker";
-import useTotalClicks from "@/hooks/useTotalClicks";
+import { useTotalClicks } from "@/hooks/useTotalClicks";
 
 /**
  * The main page of the app that controls the login flow and the game
@@ -15,7 +15,7 @@ import useTotalClicks from "@/hooks/useTotalClicks";
  * 2. Show the game
  */
 export default function Home() {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const { data: session } = useAbstractSession();
   const { totalClicks, isLoading } = useTotalClicks();
 

@@ -1,4 +1,4 @@
-import characterProperties from "@/const/characterProperties";
+import characterProperties from "@/config/character/characterProperties";
 import Character from "@/types/Character";
 
 /**

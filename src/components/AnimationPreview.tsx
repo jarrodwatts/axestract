@@ -1,25 +1,17 @@
 "use client";
 
 import React, { useEffect, useRef, useCallback } from "react";
-import actions from "@/const/actions";
-import characterProperties from "@/const/characterProperties";
+import actions from "@/config/contracts/actions";
 import Character from "@/types/Character";
 import directions from "@/types/Direction";
 import { useCharacterImages } from "@/hooks/useCharacterImages";
 import { useFrameAnimation } from "@/hooks/useFrameAnimation";
 import { drawCharacterLayers, CANVAS_SIZE } from "@/utils/canvasUtils";
-
-// This is not used anymore, but keeping if we want to introduce cosmetics later.
-// We can animate many different colors of axe.
-type AxeType =
-  | "axe"
-  | "axe_wood"
-  | "axe_copper"
-  | "axe_silver"
-  | "axe_gold"
-  | "axe_blue"
-  | "axe_pink";
-
+import {
+  getCharacterLayerPath,
+  getToolPath,
+} from "@/utils/characterPaths";
+import characterProperties from "@/config/character/characterProperties";
 
 interface AnimationCanvasProps {
   character: Character; // character to animate
@@ -30,7 +22,6 @@ interface AnimationCanvasProps {
   drawWidth?: number; // within the canvas, how wide to draw the character
   drawHeight?: number; // within the canvas, how tall to draw the character
   style?: React.CSSProperties; // style to apply to the canvas
-  axeType?: AxeType; // Not used anymore, but keeping if we want to introduce cosmetics later.
 }
 
 const AnimationPreview: React.FC<AnimationCanvasProps> = ({
@@ -42,33 +33,19 @@ const AnimationPreview: React.FC<AnimationCanvasProps> = ({
   drawWidth,
   drawHeight,
   style,
-  axeType = "axe",
 }) => {
   // Keep a reference to the canvas element
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Get the file path of the image to render for each layer of the character
-  // Characters have many layers, e.g. body, hair, eyes, etc.
   const getFilePathForLayer = useCallback(
-    (layer: keyof typeof characterProperties) => {
-      if (!character[layer]) return "";
-
-      const filePath = `animations/${actions[action].path}/${characterProperties[layer].path}/`;
-      const file =
-        characterProperties[layer].files[character[layer]?.type as number];
-      const fileWithoutType = file.split(".")[0];
-      const fileWithAction = `${fileWithoutType}_${action}`;
-
-      return `${filePath}${fileWithAction}.${file.split(".")[1]}`;
-    },
+    (layer: keyof typeof characterProperties) =>
+      getCharacterLayerPath(character, action, layer),
     [action, character]
   );
 
   // Get special file path for the axe/tool
-  // This is kind of redundant now we don't have different colors of axe
-  const getToolFilePath = useCallback(() => {
-    return `animations/${actions[action].path}/e-tool/${axeType}.png`;
-  }, [action, axeType]);
+  const getToolFilePath = useCallback(() => getToolPath(action), [action]);
 
   // Load all of the character images we want to draw on the canvas.
   const { layerImages, toolImage, isLoading } = useCharacterImages(

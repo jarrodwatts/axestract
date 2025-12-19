@@ -1,10 +1,10 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { useAbstractClient } from "@abstract-foundation/agw-react";
 import { createAndStoreSession } from "@/lib/session-keys/createAndStoreSession";
-import { QUERY_KEYS } from "@/const/query-keys";
+import { QUERY_KEYS } from "@/config/query-keys";
 
 /**
  * Hook to create and store Abstract sessions
@@ -12,7 +12,7 @@ import { QUERY_KEYS } from "@/const/query-keys";
  */
 export function useCreateAbstractSession() {
   const { data: abstractClient } = useAbstractClient();
-  const { address } = useAccount();
+  const { address } = useConnection();
   const queryClient = useQueryClient();
 
   const createSessionMutation = useMutation({

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Character from "@/types/Character";
-import characterProperties from "@/const/characterProperties";
+import characterProperties from "@/config/character/characterProperties";
 
 /**
  * Custom hook to handle loading character images for animations

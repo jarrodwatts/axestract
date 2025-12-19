@@ -8,53 +8,15 @@ import { useCharacterImages } from "@/hooks/useCharacterImages";
 import { BASE_ANIMATION_SPEED_MS, useFrameAnimation } from "@/hooks/useFrameAnimation";
 import { drawCharacterLayers } from "@/utils/canvasUtils";
 import { renderNatureTile } from "@/utils/natureImages";
-
-
-// These are not used anymore, but keeping if we want to introduce cosmetics later.
-// Types for weapon selection
-// type AxeType =
-//   | "axe"
-//   | "axe_wood"
-//   | "axe_copper"
-//   | "axe_silver"
-//   | "axe_gold"
-//   | "axe_blue"
-//   | "axe_pink";
-
-// Originally, leaves exploded from the tree when you clicked it.
-// The game doesn't do this anymore, but maybe we can bring it back later.
-// Types for leaf particle animation
-// type Leaf = {
-//   id: string;
-//   x: number;
-//   y: number;
-//   rotation: number;
-//   scale: number;
-//   velocityX: number;
-//   velocityY: number;
-//   angularVelocity: number;
-//   type: string;
-//   opacity: number;
-//   gravity: number;
-// };
-
-// Available leaf types for animation
-// const LEAF_TYPES = [
-//   "Apple Tree Leaf",
-//   "Orange Tree Leaf",
-//   "Birch Tree Leaf",
-//   "Pine Tree Leaf",
-//   "Pear Tree Leaf",
-// ];
+import { getCharacterLayerPath, getToolPath } from "@/utils/characterPaths";
 
 interface MiniMiningInstanceProps {
   character: Character; // character to animate
   // selectedAxe: AxeType; // again originally there was a selection of different axes
   instanceCanvasSize?: number; // size of the canvas to draw
-  uiState: "submitting" | "optimistic" | "confirmed" | "failed"; // state of the instance
+  uiState: "submitting" | "confirmed" | "failed"; // state of the instance
   errorMessage?: string; // error message to display if any
   clickTimestamp: number; // timestamp that the click happened
-  optimisticConfirmTimestamp?: number; // timestamp that the optimistic confirmation happened
   finalizedTimestamp?: number; // timestamp that the final confirmation happened
   blockExplorerBaseUrl?: string; // url to the block explorer
   txHash?: `0x${string}`; // tx hash of the transaction
@@ -73,7 +35,6 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
   uiState,
   errorMessage,
   clickTimestamp,
-  optimisticConfirmTimestamp,
   finalizedTimestamp,
   blockExplorerBaseUrl,
   txHash,
@@ -81,7 +42,7 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
   // Keep a reference to the canvas element
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // const [leaves, setLeaves] = useState<Leaf[]>([]); // not used anymore
-  
+
   const animationLoopIdRef = useRef<number | null>(null);
   const [treeScale, setTreeScale] = useState(1);
   const treeAnimationRef = useRef<number | null>(null);
@@ -90,11 +51,9 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
   const currentActionName =
     uiState === "submitting"
       ? "axe"
-      : uiState === "optimistic"
-      ? "axe"
       : uiState === "failed"
-      ? "die"
-      : "walk";
+        ? "die"
+        : "walk";
   const actualAction = actions[currentActionName] ? currentActionName : "walk";
   const actionToUse = actions[actualAction] ? actualAction : "walk";
   const direction = "right";
@@ -112,22 +71,15 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
 
   // How to load the character image files for each layer
   const getFilePathForLayer = useCallback(
-    (layer: keyof typeof characterProperties) => {
-      if (!character[layer] || !actions[actionToUse]) return "";
-      const filePath = `animations/${actions[actionToUse].path}/${characterProperties[layer].path}/`;
-      const file =
-        characterProperties[layer].files[character[layer]?.type as number];
-      const fileWithoutType = file.split(".")[0];
-      const fileWithAction = `${fileWithoutType}_${actionToUse}`;
-      return `${filePath}${fileWithAction}.${file.split(".")[1]}`;
-    },
+    (layer: keyof typeof characterProperties) =>
+      getCharacterLayerPath(character, actionToUse, layer),
     [actionToUse, character]
   );
 
-  const getToolFilePath = useCallback(() => {
-    if (!actions[actionToUse] || actionToUse === "walk") return ""; // no tool animations for walking
-    return `animations/${actions[actionToUse].path}/e-tool/axe.png`;
-  }, [actionToUse]);
+  const getToolFilePath = useCallback(
+    () => getToolPath(actionToUse),
+    [actionToUse]
+  );
 
   const { layerImages, toolImage, isLoading } = useCharacterImages(
     character,
@@ -136,8 +88,7 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
     getToolFilePath
   );
 
-  const isAnimatingForHook =
-    uiState === "submitting" || uiState === "optimistic";
+  const isAnimatingForHook = uiState === "submitting";
 
   const { currentFrame } = useFrameAnimation(
     actionToUse,
@@ -145,11 +96,41 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
     isLoading,
   );
 
+  // Animate tree scale when submitting
+  const animateTree = useCallback(() => {
+    const ANIMATION_DURATION = 15;
+    const MAX_SCALE = 1.1;
+    let frame = 0;
+    let growing = true;
+
+    const doAnimate = () => {
+      frame++;
+      if (growing) {
+        const progress = Math.min(1, frame / ANIMATION_DURATION);
+        setTreeScale(1 + (MAX_SCALE - 1) * progress);
+        if (frame >= ANIMATION_DURATION) {
+          growing = false;
+          frame = 0;
+        }
+      } else {
+        const progress = Math.min(1, frame / ANIMATION_DURATION);
+        setTreeScale(1 + (MAX_SCALE - 1) * (1 - progress));
+        if (frame >= ANIMATION_DURATION) {
+          setTreeScale(1);
+          treeAnimationRef.current = null;
+          return;
+        }
+      }
+      treeAnimationRef.current = requestAnimationFrame(doAnimate);
+    };
+    treeAnimationRef.current = requestAnimationFrame(doAnimate);
+  }, []);
+
   useEffect(() => {
-    if (uiState === "submitting" || uiState === "optimistic") {
+    if (uiState === "submitting") {
       animateTree();
     }
-  }, [uiState]);
+  }, [uiState, animateTree]);
 
   useEffect(() => {
     if (isLoading || !canvasRef.current) {
@@ -171,7 +152,6 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
       // Determine if we should be in an active animation loop
       const shouldLoop =
         (uiState === "submitting" && actionToUse === "axe") || // Axe animation
-        (uiState === "optimistic" && actionToUse === "axe") || // Axe animation (changed from pickaxe)
         (uiState === "failed" && actionToUse === "die"); // Die animation
 
       if (
@@ -199,7 +179,7 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (uiState === "submitting" || uiState === "optimistic") {
+      if (uiState === "submitting") {
         ctx.save();
         const treeCenterX = treeX + TREE_DRAW_SIZE / 2;
         const treeCenterY = treeY + TREE_DRAW_SIZE / 2;
@@ -219,11 +199,10 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
 
       // Draw Character (if applicable)
       if (
-        shouldLoop || // Actively animating (axe, pickaxe, die)
+        shouldLoop || // Actively animating (axe, die)
         (uiState === "confirmed" && actionToUse === "walk") || // Static walk for confirmed
         (uiState === "failed" && actionToUse === "walk") || // Static walk for failed (if not dying)
-        (uiState === "submitting" && actionToUse === "walk") || // Static walk for submitting (if not axing)
-        (uiState === "optimistic" && actionToUse === "walk") // Static walk for optimistic (e.g. layers loading, not pickaxing)
+        (uiState === "submitting" && actionToUse === "walk") // Static walk for submitting (if not axing)
       ) {
         drawCharacterLayers(
           ctx,
@@ -295,41 +274,9 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
     CHARACTER_DRAW_SIZE,
   ]);
 
-  const animateTree = () => {
-    const ANIMATION_DURATION = 15;
-    const MAX_SCALE = 1.1;
-    let frame = 0;
-    let growing = true;
-
-    const doAnimate = () => {
-      frame++;
-      if (growing) {
-        const progress = Math.min(1, frame / ANIMATION_DURATION);
-        setTreeScale(1 + (MAX_SCALE - 1) * progress);
-        if (frame >= ANIMATION_DURATION) {
-          growing = false;
-          frame = 0;
-        }
-      } else {
-        const progress = Math.min(1, frame / ANIMATION_DURATION);
-        setTreeScale(1 + (MAX_SCALE - 1) * (1 - progress));
-        if (frame >= ANIMATION_DURATION) {
-          setTreeScale(1);
-          treeAnimationRef.current = null;
-          return;
-        }
-      }
-      treeAnimationRef.current = requestAnimationFrame(doAnimate);
-    };
-    treeAnimationRef.current = requestAnimationFrame(doAnimate);
-  };
-
   if (uiState === "submitting") {
     bgColorClass = "bg-orange-500/20";
     borderColorClass = "border-orange-500";
-  } else if (uiState === "optimistic") {
-    bgColorClass = "bg-green-500/20";
-    borderColorClass = "border-green-500";
   } else if (uiState === "confirmed") {
     bgColorClass = "bg-green-600";
     borderColorClass = "border-green-700";
@@ -339,9 +286,7 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
   }
 
   const isLinkable =
-    (uiState === "confirmed" ||
-      uiState === "failed" ||
-      uiState === "optimistic") &&
+    (uiState === "confirmed" || uiState === "failed") &&
     !!blockExplorerBaseUrl &&
     !!txHash;
 
@@ -351,9 +296,8 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
 
   const wrapperProps: React.HTMLAttributes<HTMLDivElement> &
     React.AnchorHTMLAttributes<HTMLAnchorElement> = {
-    className: `w-full p-2 rounded-md border-2 ${bgColorClass} ${borderColorClass} flex items-center gap-3 transition-all duration-300 ${
-      isLinkable ? "hover:opacity-90 cursor-pointer" : ""
-    }`,
+    className: `w-full p-2 rounded-md border-2 ${bgColorClass} ${borderColorClass} flex items-center gap-3 transition-all duration-300 ${isLinkable ? "hover:opacity-90 cursor-pointer" : ""
+      }`,
   };
 
   if (isLinkable && href) {
@@ -367,8 +311,6 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
     switch (uiState) {
       case "submitting":
         return <span className="text-xs text-white">Submitting...</span>;
-      case "optimistic":
-        return <span className="text-xs text-white">Preconfirmed.</span>;
       case "confirmed":
         return <span className="text-xs text-white">Confirmed on-chain.</span>;
       case "failed":
@@ -388,22 +330,14 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
   const getTimingInfo = () => {
     if (uiState !== "confirmed") return null;
 
-    const timeToOptimisticMs =
-      optimisticConfirmTimestamp && clickTimestamp
-        ? optimisticConfirmTimestamp - clickTimestamp
-        : null;
-
-    const timeToFinalizedMs =
-      finalizedTimestamp && optimisticConfirmTimestamp
-        ? finalizedTimestamp - optimisticConfirmTimestamp
+    const timeToConfirmMs =
+      finalizedTimestamp && clickTimestamp
+        ? finalizedTimestamp - clickTimestamp
         : null;
 
     return (
       <div className="flex flex-col text-xs mt-1 text-white">
-        {timeToOptimisticMs !== null && (
-          <p>⏱️ Preconf: {timeToOptimisticMs}ms</p>
-        )}
-        {timeToFinalizedMs !== null && <p>⏱️ Final: {timeToFinalizedMs}ms</p>}
+        {timeToConfirmMs !== null && <p>⏱️ Confirmed: {timeToConfirmMs}ms</p>}
       </div>
     );
   };
@@ -428,7 +362,7 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
             ❌
           </span>
         </div>
-      ) : uiState === "submitting" || uiState === "optimistic" ? (
+      ) : uiState === "submitting" ? (
         <canvas
           ref={canvasRef}
           width={instanceCanvasSize}
@@ -439,11 +373,10 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
       ) : null}
       <div className="flex-grow text-xs flex flex-col">
         <p
-          className={`font-semibold ${
-            uiState === "confirmed" || uiState === "failed"
-              ? "text-white"
-              : "text-gray-700 dark:text-gray-300"
-          }`}
+          className={`font-semibold ${uiState === "confirmed" || uiState === "failed"
+            ? "text-white"
+            : "text-gray-700 dark:text-gray-300"
+            }`}
         >
           {getStatusIndicator()}
         </p>
@@ -452,9 +385,7 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
             className="text-xs mt-1 truncate max-w-full break-words inline-flex items-center"
             style={{
               color:
-                uiState === "confirmed" ||
-                uiState === "failed" ||
-                uiState === "optimistic"
+                uiState === "confirmed" || uiState === "failed"
                   ? "white"
                   : "inherit",
               opacity: 0.8,

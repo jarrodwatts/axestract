@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useConnect } from "wagmi";
+import { useConnection, useConnect } from "wagmi";
 import { useLoginWithAbstract } from "@abstract-foundation/agw-react";
 import generateRandomCharacter from "@/lib/render-character/generateRandomCharacter";
 import { useAbstractSession } from "@/hooks/useAbstractSession";
@@ -21,7 +21,7 @@ export default function LoginFlow() {
   const [character] = useState(() => generateRandomCharacter());
 
   // 1. == Wallet Connection ==
-  const { address, status } = useAccount();
+  const { address, status } = useConnection();
   const isWalletConnecting =
     status === "connecting" || status === "reconnecting";
   const { login } = useLoginWithAbstract();
@@ -120,9 +120,8 @@ export default function LoginFlow() {
         {/* Status Message - Fixed height container */}
         <div className="h-6 mt-6 lg:mt-12">
           <div
-            className={`text-sm transition-opacity duration-200 ${
-              hasError ? "text-red-500" : "text-gray-600"
-            } ${statusMessage ? "opacity-100" : "opacity-0"}`}
+            className={`text-sm transition-opacity duration-200 ${hasError ? "text-red-500" : "text-gray-600"
+              } ${statusMessage ? "opacity-100" : "opacity-0"}`}
           >
             {/* Space character maintains height when empty */}
             {statusMessage || " "}{" "}

@@ -1,7 +1,7 @@
 import { queryClient } from "@/components/AbstractWalletProvider";
 import { LOCAL_STORAGE_KEY_PREFIX, ENCRYPTION_KEY_PREFIX } from "./constants";
 import type { Address } from "viem";
-import { QUERY_KEYS } from "@/const/query-keys";
+import { QUERY_KEYS } from "@/config/query-keys";
 
 /**
  * @function clearStoredSession

@@ -4,11 +4,10 @@ import { SessionConfig } from "@abstract-foundation/agw-client/sessions";
 import { LOCAL_STORAGE_KEY_PREFIX } from "./constants";
 import { getEncryptionKey } from "./getEncryptionKey";
 import { encrypt } from "./encryptSession";
-import { SESSION_KEY_CONFIG } from "@/const/session-key-config";
+import { SESSION_KEY_CONFIG } from "@/config/session-key-config";
 import { AbstractClient } from "@abstract-foundation/agw-client";
-import { publicClient } from "@/const/publicClient";
-import { paymasterFields } from "@/const/chain";
-import { setSessionCreationMode } from "../transaction/sendClickTx";
+import { publicClient } from "@/config/clients/publicClient";
+import { chain, paymasterFields } from "@/config/chain";
 
 /**
  * @function createAndStoreSession
@@ -45,13 +44,12 @@ export const createAndStoreSession = async (
   if (!userAddress) return null;
 
   try {
-    // Enable session creation mode
-    setSessionCreationMode(true);
-
     const sessionPrivateKey = generatePrivateKey();
     const sessionSigner = privateKeyToAccount(sessionPrivateKey);
 
     const { session, transactionHash } = await abstractClient.createSession({
+      account: userAddress,
+      chain,
       session: {
         signer: sessionSigner.address,
         ...SESSION_KEY_CONFIG,
@@ -84,9 +82,7 @@ export const createAndStoreSession = async (
     return sessionData;
   } catch (error) {
     console.error("Failed to create session:", error);
-    throw new Error("Session creation failed");
-  } finally {
-    // Disable session creation mode
-    setSessionCreationMode(false);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`Session creation failed: ${message}`);
   }
 };

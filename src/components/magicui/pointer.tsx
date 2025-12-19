@@ -9,7 +9,9 @@ import {
 } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
 
-type PointerProps = Omit<HTMLMotionProps<"div">, "ref">;
+interface PointerProps extends Omit<HTMLMotionProps<"div">, "ref"> {
+  children?: React.ReactNode;
+}
 
 /**
  * A custom pointer component that displays an animated cursor.
@@ -24,8 +26,7 @@ export function Pointer({
   style,
   children,
   ...props
-}: // @ts-expect-error FUCK
-PointerProps): JSX.Element {
+}: PointerProps): React.JSX.Element {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const [isActive, setIsActive] = useState<boolean>(false);

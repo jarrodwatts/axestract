@@ -2,7 +2,8 @@ import { clearStoredSession } from "./clearStoredSession";
 import { abstractTestnet } from "viem/chains";
 import type { AbstractClient } from "@abstract-foundation/agw-client";
 import type { Address } from "viem";
-import { chain } from "@/const/chain";
+import { chain } from "@/config/chain";
+import SessionStatus from "@/types/SessionStatus";
 
 /**
  * @function validateSession
@@ -19,7 +20,6 @@ import { chain } from "@/const/chain";
  *
  * @param {Address} address - The wallet address that owns the session
  * @param {string} sessionHash - The hash of the session to validate
- * @param {(params: { session: SessionConfig }) => Promise<{ transactionHash?: `0x${string}`; session: SessionConfig }>} createSessionAsync - The function to create a new session
  *
  * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether
  *                            the session is valid (true) or not (false)
@@ -48,34 +48,3 @@ export const validateSession = async (
     return false;
   }
 };
-
-/**
- * @enum {number} SessionStatus
- * @description Represents the possible statuses of an Abstract Global Wallet session
- *
- * This enum maps to the SessionKeyPolicyRegistry.Status values.
- * It's used to determine if a session is valid and can be used to submit transactions on behalf of the wallet.
- */
-enum SessionStatus {
-  /**
-   * Session has not been initialized or does not exist
-   */
-  NotInitialized = 0,
-
-  /**
-   * Session is active and can be used to submit transactions
-   */
-  Active = 1,
-
-  /**
-   * Session has been manually closed/revoked by the wallet owner
-   */
-  Closed = 2,
-
-  /**
-   * Session has expired (exceeded its expiresAt timestamp)
-   */
-  Expired = 3,
-}
-
-export default SessionStatus;

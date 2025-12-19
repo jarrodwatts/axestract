@@ -42,13 +42,17 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --animate-ripple: ripple var(--duration,2s) ease calc(var(--i, 0)*.2s) infinite;
+  --animate-ripple: ripple var(--duration, 2s) ease calc(var(--i, 0)*.2s) infinite;
+
   @keyframes ripple {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1);
+
+    0%,
+    100% {
+      transform: translate(-50%, -50%) scale(1);
     }
-  50% {
-    transform: translate(-50%, -50%) scale(0.9);
+
+    50% {
+      transform: translate(-50%, -50%) scale(0.9);
     }
   }
 }
@@ -130,5 +134,68 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-press-start-2p);
+  }
+}
+
+/* Game animations and utilities */
+@keyframes subtle-grow-shrink {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.animate-subtle-grow-shrink {
+  animation: subtle-grow-shrink 3s infinite ease-in-out;
+}
+
+/* Hide scrollbar utilities */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.scrollbar-thumb-amber-700::-webkit-scrollbar-thumb {
+  background-color: #b45309;
+  border-radius: 4px;
+}
+
+.scrollbar-track-amber-200\/50::-webkit-scrollbar-track {
+  background-color: rgba(253, 230, 138, 0.5);
+  border-radius: 4px;
+}
+
+/* Wood burst effect animation */
+.wood-burst-emoji {
+  transform: translate(-50%, -50%);
+  animation: burstOutEffect 1s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes burstOutEffect {
+  0% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(calc(-50% + var(--offsetX)),
+        calc(-50% + var(--offsetY))) scale(0.3) rotate(var(--rotation));
+    opacity: 0;
   }
 }
