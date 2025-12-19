@@ -7,8 +7,10 @@ import { LOCAL_STORAGE_KEY_PREFIX } from "./constants";
 import { getEncryptionKey } from "./getEncryptionKey";
 import { decrypt } from "./decryptSession";
 import { validateSession } from "./validateSession";
+import { clearStoredSession } from "./clearStoredSession";
 import type { Address } from "viem";
 import { DEFAULT_CALL_POLICIES } from "@/config/session-key-config";
+import { logger } from "@/lib/logger";
 
 /**chain,
  * @function getStoredSession
@@ -58,6 +60,18 @@ export const getStoredSession = async (
       }
       return value;
     });
+
+    // Validate that parsed data has required structure
+    if (!parsedData?.session || !parsedData?.privateKey) {
+      logger.warn("Corrupted session data: missing required fields", {
+        address,
+        hasSession: !!parsedData?.session,
+        hasPrivateKey: !!parsedData?.privateKey,
+      });
+      clearStoredSession(address);
+      return null;
+    }
+
     // IF DEFAULT_CALL_POLICIES have changed we return null
     if (
       JSON.stringify(parsedData.session.callPolicies, (_, value) =>
@@ -67,6 +81,7 @@ export const getStoredSession = async (
         typeof value === "bigint" ? value.toString() : value
       )
     ) {
+      clearStoredSession(address);
       return null;
     }
 
@@ -74,7 +89,12 @@ export const getStoredSession = async (
     await validateSession(abstractClient, address, sessionHash);
     return parsedData;
   } catch (error) {
-    console.error("Failed to decrypt session:", error);
+    logger.error("Failed to retrieve session", {
+      address,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    // Clear corrupted/unreadable session data
+    clearStoredSession(address);
     return null;
   }
 };

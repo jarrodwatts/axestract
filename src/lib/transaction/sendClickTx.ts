@@ -8,6 +8,7 @@ import {
 import { walletClient } from "@/config/clients/walletClient";
 import { publicClient } from "@/config/clients/publicClient";
 import { createCachingTransport } from "@/config/clients/cachingTransport";
+import { logger } from "@/lib/logger";
 
 /**
  * Signs and submits a click transaction using session keys.
@@ -54,15 +55,29 @@ export async function signAndSendClickTx(
   // @ts-expect-error prepareTransactionRequest returns a union type but we know it's eip712
   const signature = await sessionClient.signTransaction(preparedTransaction);
 
+  logger.info("Submitting transaction", {
+    nonce,
+    gasLimit: gas.toString(),
+    maxFeePerGas: maxFeePerGas.toString(),
+    signaturePrefix: (signature as string).slice(0, 20) + "...",
+  });
+
   // Send the signed transaction using standard eth_sendRawTransaction
   const txHash = await publicClient.sendRawTransaction({
     serializedTransaction: signature as `0x${string}`,
   });
 
   const endTime = performance.now();
+  const timeTaken = endTime - startTime;
+
+  logger.info("Transaction submitted", {
+    txHash,
+    nonce,
+    timeTaken: `${timeTaken.toFixed(0)}ms`,
+  });
 
   return {
     txHash,
-    timeTaken: endTime - startTime,
+    timeTaken,
   };
 }

@@ -4,6 +4,7 @@ import type { AbstractClient } from "@abstract-foundation/agw-client";
 import type { Address } from "viem";
 import { chain } from "@/config/chain";
 import SessionStatus from "@/types/SessionStatus";
+import { logger } from "@/lib/logger";
 
 /**
  * @function validateSession
@@ -44,7 +45,11 @@ export const validateSession = async (
 
     return isValid;
   } catch (error) {
-    console.error("Failed to validate session:", error);
+    logger.error("Failed to validate session", {
+      address,
+      sessionHash,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return false;
   }
 };

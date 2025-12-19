@@ -69,6 +69,20 @@ export function useTransactionNonce() {
     }
   }, [address, nonceQuery]);
 
+  // Sync nonce to a specific value (used for error recovery)
+  // This sets the offset so that baseNonce + offset = targetNonce
+  const syncToNonce = useCallback(
+    (targetNonce: number) => {
+      if (baseNonce === undefined) return;
+      // Calculate what offset we need to reach the target
+      const newOffset = targetNonce - baseNonce;
+      if (newOffset >= 0) {
+        localOffsetRef.current = newOffset;
+      }
+    },
+    [baseNonce]
+  );
+
   return {
     nonce,
     isLoading: address && baseNonce === undefined ? nonceQuery.isLoading : false,
@@ -76,6 +90,7 @@ export function useTransactionNonce() {
     error: nonceQuery.error,
     incrementNonce,
     refreshNonce,
+    syncToNonce,
     refetch: refreshNonce,
   };
 }

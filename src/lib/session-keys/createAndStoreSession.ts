@@ -8,6 +8,7 @@ import { SESSION_KEY_CONFIG } from "@/config/session-key-config";
 import { AbstractClient } from "@abstract-foundation/agw-client";
 import { publicClient } from "@/config/clients/publicClient";
 import { chain, paymasterFields } from "@/config/chain";
+import { logger } from "@/lib/logger";
 
 /**
  * @function createAndStoreSession
@@ -81,8 +82,11 @@ export const createAndStoreSession = async (
     );
     return sessionData;
   } catch (error) {
-    console.error("Failed to create session:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
+    logger.error("Failed to create session", {
+      userAddress,
+      error: message,
+    });
     throw new Error(`Session creation failed: ${message}`);
   }
 };

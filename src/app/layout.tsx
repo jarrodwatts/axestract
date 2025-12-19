@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Press_Start_2P } from "next/font/google";
 import AbstractWalletWrapper from "@/components/AbstractWalletProvider";
 import BackgroundMusic from "@/components/BackgroundMusic";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import "./globals.css";
 
 // Cool gaming font
@@ -28,8 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${pressStart2P.variable} antialiased`}>
-        <BackgroundMusic />
-        <AbstractWalletWrapper>{children}</AbstractWalletWrapper>
+        <ErrorBoundary>
+          <BackgroundMusic />
+          <AbstractWalletWrapper>{children}</AbstractWalletWrapper>
+        </ErrorBoundary>
       </body>
     </html>
   );

@@ -27,7 +27,7 @@ export function getCharacterLayerPath(
  * Returns empty string for actions that don't use tools (like walking).
  */
 export function getToolPath(action: keyof typeof actions): string {
-  if (!actions[action] || action === "walk") return "";
+  if (!actions[action] || action === "walk" || action === "die") return "";
   return `animations/${actions[action].path}/e-tool/axe.png`;
 }
 

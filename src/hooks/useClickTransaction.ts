@@ -8,11 +8,50 @@ import { useClickGasEstimate } from "./useClickGasEstimate";
 import { useTransactionNonce } from "./useTransactionNonce";
 import { signAndSendClickTx } from "@/lib/transaction/sendClickTx";
 import { checkTransactionReady } from "@/lib/transaction/checkTransactionReady";
+import { logger } from "@/lib/logger";
 
 export interface TransactionResult {
   success: boolean;
   txHash?: `0x${string}`;
   error?: string;
+}
+
+/**
+ * Maps raw blockchain error messages to user-friendly messages.
+ */
+function getUserFriendlyError(error: string): string {
+  const lowerError = error.toLowerCase();
+  if (lowerError.includes("nonce too high") || lowerError.includes("nonce too low")) {
+    return "Transaction sync issue. Please try again.";
+  }
+  if (lowerError.includes("insufficient funds")) {
+    return "Insufficient funds for gas.";
+  }
+  if (lowerError.includes("rejected") || lowerError.includes("denied")) {
+    return "Transaction was rejected.";
+  }
+  if (lowerError.includes("timeout") || lowerError.includes("timed out")) {
+    return "Request timed out. Please try again.";
+  }
+  if (lowerError.includes("network") || lowerError.includes("connection")) {
+    return "Network error. Please check your connection.";
+  }
+  return "Transaction failed. Please try again.";
+}
+
+/**
+ * Parse nonce error to extract the allowed range.
+ * Error format: "allowed nonce range: 2782 - 2802, actual: 2803"
+ */
+function parseNonceRange(error: string): { min: number; max: number } | null {
+  const match = error.match(/allowed nonce range:\s*(\d+)\s*-\s*(\d+)/i);
+  if (match) {
+    return {
+      min: parseInt(match[1], 10),
+      max: parseInt(match[2], 10),
+    };
+  }
+  return null;
 }
 
 /**
@@ -49,6 +88,12 @@ export function useClickTransaction() {
         typeof gasEstimateQuery.data.maxFeePerGas === "undefined" ||
         typeof gasEstimateQuery.data.maxPriorityFeePerGas === "undefined"
       ) {
+        logger.warn("Transaction pre-requisites not met", {
+          hasAddress: !!address,
+          hasSessionKey: !!sessionData?.privateKey,
+          hasGasData: !!gasEstimateQuery.data,
+          nonce,
+        });
         return {
           success: false,
           error: "Transaction pre-requisites not met.",
@@ -69,17 +114,46 @@ export function useClickTransaction() {
 
         return { success: true, txHash };
       } catch (error) {
-        const errorMessage =
+        const rawMessage =
           error instanceof Error ? error.message : String(error);
 
-        // Auto-recover from nonce desync errors by resetting offset and refetching
-        if (errorMessage.includes("nonce too high")) {
-          nonceQuery.refreshNonce();
+        logger.error("Transaction failed", {
+          rawError: rawMessage,
+          userError: getUserFriendlyError(rawMessage),
+          address,
+          nonce,
+        });
+
+        // Smart recovery from nonce errors using the allowed range from error
+        const lowerMessage = rawMessage.toLowerCase();
+        if (lowerMessage.includes("nonce too")) {
+          const range = parseNonceRange(rawMessage);
+          if (range) {
+            if (lowerMessage.includes("nonce too low")) {
+              // Jump to minimum allowed nonce
+              logger.info("Syncing nonce (too low)", {
+                currentNonce: nonce,
+                syncingTo: range.min,
+              });
+              nonceQuery.syncToNonce(range.min);
+            } else if (lowerMessage.includes("nonce too high")) {
+              // Jump to max allowed nonce (the mempool limit)
+              // Next increment will go to max+1, but that's expected behavior
+              logger.info("Syncing nonce (too high)", {
+                currentNonce: nonce,
+                syncingTo: range.max,
+              });
+              nonceQuery.syncToNonce(range.max);
+            }
+          } else {
+            // Fallback: couldn't parse range, do a full refresh
+            nonceQuery.refreshNonce();
+          }
         }
 
         return {
           success: false,
-          error: errorMessage || "Transaction failed for an unknown reason.",
+          error: getUserFriendlyError(rawMessage),
         };
       }
     },

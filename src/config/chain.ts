@@ -1,8 +1,15 @@
 import { abstractTestnet, abstract } from "viem/chains";
 import { getGeneralPaymasterInput } from "viem/zksync";
 
-// export const IS_PRODUCTION = process.env.NODE_ENV === "production";
-export const IS_PRODUCTION = false; // force to testnet
+// Validate chain environment at startup
+const CHAIN_ENV = process.env.NEXT_PUBLIC_CHAIN_ENV;
+if (!CHAIN_ENV || !["mainnet", "testnet"].includes(CHAIN_ENV)) {
+  throw new Error(
+    `NEXT_PUBLIC_CHAIN_ENV must be "mainnet" or "testnet", got: "${CHAIN_ENV}"`
+  );
+}
+
+export const IS_PRODUCTION = CHAIN_ENV === "mainnet";
 
 export const chain = IS_PRODUCTION ? abstract : abstractTestnet;
 
