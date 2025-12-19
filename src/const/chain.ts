@@ -10,6 +10,10 @@ export const API_URL = IS_PRODUCTION
   ? "https://api.mainnet.abs.xyz"
   : "https://api.testnet.abs.xyz";
 
+export const WS_URL = IS_PRODUCTION
+  ? "wss://api.mainnet.abs.xyz/ws"
+  : "wss://api.testnet.abs.xyz/ws";
+
 export const paymasterFields = IS_PRODUCTION
   ? {}
   : {
