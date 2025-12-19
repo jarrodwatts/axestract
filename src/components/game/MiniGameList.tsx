@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import MiniMiningInstance from "../MiniMiningInstance";
-import TransactionMonitor from "../TransactionMonitor";
+import MiniMiningInstance from "./MiniMiningInstance";
+import TransactionMonitor from "./TransactionMonitor";
 import { type ActiveMiniGame } from "@/types/Game";
-import { chain } from "@/const/chain";
+import { chain } from "@/config/chain";
 
 interface MiniGameListProps {
   activeMiniGames: ActiveMiniGame[];

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import actions from "@/const/actions";
+import actions from "@/config/contracts/actions";
 
 // Base animation speed in milliseconds (slower)
 export const BASE_ANIMATION_SPEED_MS = 120;

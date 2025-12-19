@@ -6,11 +6,11 @@ import Character from "@/types/Character";
 import directions from "@/types/Direction";
 import { useCharacterImages } from "@/hooks/useCharacterImages";
 import { useFrameAnimation } from "@/hooks/useFrameAnimation";
-import { drawCharacterLayers, CANVAS_SIZE } from "@/utils/canvasUtils";
+import { drawCharacterLayers, CANVAS_SIZE } from "@/lib/render-character/canvasUtils";
 import {
   getCharacterLayerPath,
   getToolPath,
-} from "@/utils/characterPaths";
+} from "@/lib/render-character/characterPaths";
 import characterProperties from "@/config/character/characterProperties";
 
 interface AnimationCanvasProps {

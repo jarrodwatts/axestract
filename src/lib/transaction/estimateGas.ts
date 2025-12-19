@@ -1,5 +1,5 @@
-import { COOKIE_CLICKER_CONTRACT_ADDRESS } from "@/const/contracts";
-import { publicClient } from "@/const/publicClient";
+import { COOKIE_CLICKER_CONTRACT_ADDRESS } from "@/config/contracts/contracts";
+import { publicClient } from "@/config/clients/publicClient";
 import { Address, toFunctionSelector } from "viem";
 
 /**

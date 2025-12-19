@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRef, useCallback } from "react";
 import { getNonce } from "@/lib/transaction/getNonce";
 import { useConnection } from "wagmi";
-import { QUERY_KEYS } from "@/const/query-keys";
+import { QUERY_KEYS } from "@/config/query-keys";
 
 /**
  * Hook to get the current nonce for a wallet address
