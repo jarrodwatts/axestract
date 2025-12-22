@@ -234,7 +234,7 @@ export default function MiningGame({
     [isTransactionReady, getNextNonce, incrementClickCount, triggerPulse, checkAndUnlockLumberjacks, submitTransaction]
   );
 
-  // Keep refs updated for interval callbacks (consolidated into single effect)
+  // Keep refs updated for interval callbacks
   useEffect(() => {
     unlockedLumberjacksRef.current = unlockedLumberjacks;
     clickCountRef.current = clickCount;

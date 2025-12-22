@@ -17,13 +17,6 @@ export function useCharacterImages(
   const [toolImage, setToolImage] = useState<HTMLImageElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Reset state when character or action changes
-  useEffect(() => {
-    setLayerImages({});
-    setToolImage(null);
-    setIsLoading(true);
-  }, [character, action]);
-
   // Load tool image separately
   useEffect(() => {
     if (!getToolFilePath) {
@@ -31,33 +24,41 @@ export function useCharacterImages(
       return;
     }
 
+    let ignore = false;
+
     const loadToolImage = async () => {
       const src = getToolFilePath();
 
       if (!src) {
-        setToolImage(null);
+        if (!ignore) setToolImage(null);
         return;
       }
 
       const image = new Image();
-      return new Promise<void>((resolve) => {
-        image.src = src;
-        image.onload = () => {
-          setToolImage(image);
-          resolve();
-        };
-        image.onerror = () => {
-          setToolImage(null);
-          resolve();
-        };
-      });
+      image.src = src;
+      image.onload = () => {
+        if (!ignore) setToolImage(image);
+      };
+      image.onerror = () => {
+        if (!ignore) setToolImage(null);
+      };
     };
 
     loadToolImage();
+
+    return () => {
+      ignore = true;
+    };
   }, [getToolFilePath]);
 
   // Load all images for the character layers
   useEffect(() => {
+    let ignore = false;
+
+    // Set loading state at the start - replaces the separate reset effect
+    setIsLoading(true);
+    setLayerImages({});
+
     const loadImages = async () => {
       // Get character keys that have values, ordered by layer index
       const characterKeys = Object.keys(character)
@@ -92,6 +93,9 @@ export function useCharacterImages(
       // Wait for all images to load
       const results = await Promise.all(imagePromises);
 
+      // Only update state if this request hasn't been superseded
+      if (ignore) return;
+
       // Create new images object
       const newImages = results.reduce<Record<string, HTMLImageElement>>(
         (acc, { key, image }) => {
@@ -106,6 +110,10 @@ export function useCharacterImages(
     };
 
     loadImages();
+
+    return () => {
+      ignore = true;
+    };
   }, [character, action, getFilePathForLayer]);
 
   return { layerImages, toolImage, isLoading };

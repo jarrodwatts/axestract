@@ -18,11 +18,22 @@ export function useFrameAnimation(
   const animationFrameRef = useRef(0);
   const [currentFrame, setCurrentFrame] = useState(0);
 
-  // Reset animation frame when action changes or animation stops
-  useEffect(() => {
+  // Track previous values to detect changes during render
+  const prevActionRef = useRef(action);
+  const prevIsAnimatingRef = useRef(isAnimating);
+
+  // Reset frame during render when action or isAnimating changes
+  if (
+    action !== prevActionRef.current ||
+    isAnimating !== prevIsAnimatingRef.current
+  ) {
+    prevActionRef.current = action;
+    prevIsAnimatingRef.current = isAnimating;
     animationFrameRef.current = 0;
-    setCurrentFrame(0);
-  }, [action, isAnimating]);
+    if (currentFrame !== 0) {
+      setCurrentFrame(0);
+    }
+  }
 
   // Animation loop effect
   useEffect(() => {
