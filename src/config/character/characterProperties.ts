@@ -315,3 +315,5 @@ const characterProperties = {
 };
 
 export default characterProperties;
+
+

@@ -7,3 +7,5 @@ export const walletClient = createWalletClient({
   chain: chain,
   transport: http(),
 }).extend(eip712WalletActions());
+
+

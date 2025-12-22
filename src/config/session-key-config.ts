@@ -31,3 +31,5 @@ export const SESSION_KEY_CONFIG: Omit<SessionConfig, "signer"> = {
   callPolicies: DEFAULT_CALL_POLICIES,
   transferPolicies: [],
 };
+
+

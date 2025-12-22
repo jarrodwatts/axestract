@@ -23,3 +23,5 @@ export const wsPublicClient = createPublicClient({
     },
   }),
 }).extend(publicActionsL2());
+
+

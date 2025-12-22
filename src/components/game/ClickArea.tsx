@@ -34,3 +34,5 @@ export function ClickArea({ onPointerDown }: ClickAreaProps) {
 }
 
 export default ClickArea;
+
+

@@ -87,3 +87,5 @@ export function LumberjackGrid({ unlockedLumberjacks }: LumberjackGridProps) {
 }
 
 export default LumberjackGrid;
+
+

@@ -74,3 +74,5 @@ export function WalletInfoCard({ address }: WalletInfoCardProps) {
 }
 
 export default WalletInfoCard;
+
+

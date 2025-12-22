@@ -14,9 +14,9 @@ const pressStart2P = Press_Start_2P({
 
 // Metadata for the entire app
 export const metadata: Metadata = {
-  title: "Axestract",
+  title: "Axestract | Chop Wood, Earn Rewards on Abstract",
   description:
-    "A demo game showcasing Abstracts new realtime JSON RPC endpoint.",
+    "A free-to-play idle clicker game on Abstract. Chop wood, collect lumberjacks, and compete on the leaderboard. No gas fees, instant transactions.",
 };
 
 // Wrap the entire app in the Abstract Wallet Wrapper

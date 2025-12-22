@@ -425,3 +425,5 @@ const MiniMiningInstance: React.FC<MiniMiningInstanceProps> = ({
 };
 
 export default MiniMiningInstance;
+
+

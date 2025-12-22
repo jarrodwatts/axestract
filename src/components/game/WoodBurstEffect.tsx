@@ -40,3 +40,5 @@ export function WoodBurstEffect({ emojis }: WoodBurstEffectProps) {
 }
 
 export default WoodBurstEffect;
+
+

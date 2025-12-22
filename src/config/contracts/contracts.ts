@@ -60,3 +60,5 @@ export const COOKIE_CLICKER_CONTRACT_ABI = [
     anonymous: false,
   },
 ];
+
+

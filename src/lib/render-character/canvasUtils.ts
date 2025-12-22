@@ -121,3 +121,5 @@ export function drawCharacterLayers(
   // Restore canvas context
   ctx.restore();
 }
+
+

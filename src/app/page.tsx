@@ -36,10 +36,10 @@ export default function Home() {
       {!isGameActive && (
         <div className="relative w-full z-20 flex flex-col items-center flex-grow justify-center">
           <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow-[4px_4px_0_rgba(0,0,0,0.9)] tracking-wide uppercase text-center mb-2 md:mb-4 max-w-3xl mx-auto leading-[1.25] mt-2">
-            Realtime Gaming on Abstract
+            Chop Wood. Earn Rewards.
           </h1>
           <p className="text-lg md:text-xl text-white font-mono text-center mb-2 lg:mt-2 mt-2 max-w-2xl mx-auto">
-            A demo game showcasing Abstract&rsquo;s new realtime endpoint
+            Free-to-play idle clicker on Abstract. No gas, instant transactions.
           </p>
           <div className="w-full flex items-center justify-center gap-2 text-[#fbec4f] font-bold mb-8 md:mb-10 drop-shadow-[2px_2px_0_rgba(0,0,0,0.9)]">
             {isLoading ? (
