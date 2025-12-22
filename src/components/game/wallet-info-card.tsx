@@ -22,13 +22,14 @@ export function WalletInfoCard({ address }: WalletInfoCardProps) {
         alt="Abstract Wallet"
         width={36}
         height={36}
-        className="flex-shrink-0"
+        className="flex-shrink-0 select-none pointer-events-none"
         style={{
           filter: "invert(0) brightness(0)",
         }}
+        draggable={false}
       />
       <div className="flex flex-col flex-1 min-w-0 justify-center">
-        <span className="font-bold text-[#5a4a1a] text-sm sm:text-md leading-none mb-1">
+        <span className="font-bold text-[#5a4a1a] text-sm sm:text-md leading-none mb-1 select-none">
           Your Wallet
         </span>
         <span className="flex items-center gap-1.5">
