@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import LoginFlow from "@/components/LoginFlow";
-import { DotPattern } from "@/components/DotPattern";
+import LoginFlow from "@/components/login-flow";
+import { DotPattern } from "@/components/dot-pattern";
 import { useConnection } from "wagmi";
-import { useAbstractSession } from "@/hooks/useAbstractSession";
+import { useAbstractSession } from "@/hooks/use-abstract-session";
 import { NumberTicker } from "@/components/magicui/number-ticker";
-import { useTotalClicks } from "@/hooks/useTotalClicks";
+import { useTotalClicks } from "@/hooks/use-total-clicks";
 
 /**
  * The main page of the app that controls the login flow and the game

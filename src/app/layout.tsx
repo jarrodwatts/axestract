@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Press_Start_2P } from "next/font/google";
-import AbstractWalletWrapper from "@/components/AbstractWalletProvider";
-import BackgroundMusic from "@/components/BackgroundMusic";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import AbstractWalletWrapper from "@/components/abstract-wallet-provider";
+import BackgroundMusic from "@/components/background-music";
+import ErrorBoundary from "@/components/error-boundary";
 import "./globals.css";
 
 // Cool gaming font
