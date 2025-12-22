@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { logger } from "@/lib/logger";
 
 /**
  * In the bottom right of the game, there is a button to play the background music.
@@ -37,7 +38,9 @@ export default function BackgroundMusic() {
         await audioRef.current.play();
         setIsPlaying(true);
       } catch (error) {
-        console.error("Failed to play background music:", error);
+        logger.error("Failed to play background music", {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
   };
